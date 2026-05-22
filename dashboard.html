@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de Demandas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #1a56db;
+      --purple:  #9333ea;
+      --yellow:  #f59e0b;
+      --green:   #10b981;
+      --red:     #ef4444;
+      --gray:    #6b7280;
+      --bg:      #f0f2f5;
+      --surface: #ffffff;
+      --border:  #e5e7eb;
+      --text:    #111827;
+      --text2:   #6b7280;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 14px; }
+
+    .logo-badges { display: flex; gap: 8px; }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-rhama { background: #e8f0fe; color: var(--blue); }
+    .badge-vexus { background: #fce8ff; color: var(--purple); }
+
+    h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+
+    .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    select, input[type="text"] {
+      padding: 7px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+
+    select:focus, input:focus { border-color: var(--blue); }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text2); }
+
+    #last-update { font-size: 12px; color: var(--text2); }
+
+    /* ── MAIN ── */
+    main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+    /* ── KPI CARDS ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .kpi.total::before    { background: var(--blue); }
+    .kpi.pendente::before { background: var(--yellow); }
+    .kpi.andamento::before{ background: var(--blue); }
+    .kpi.concluido::before{ background: var(--green); }
+    .kpi.atrasado::before { background: var(--red); }
+
+    .kpi-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 36px; font-weight: 800; line-height: 1; }
+    .kpi-sub   { font-size: 12px; color: var(--text2); }
+
+    .kpi.total .kpi-value    { color: var(--blue); }
+    .kpi.pendente .kpi-value { color: var(--yellow); }
+    .kpi.andamento .kpi-value{ color: var(--blue); }
+    .kpi.concluido .kpi-value{ color: var(--green); }
+    .kpi.atrasado .kpi-value { color: var(--red); }
+
+    /* ── CHARTS ROW ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .chart-wrap { position: relative; height: 180px; }
+
+    /* ── TABELA ── */
+    .table-card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .table-header h2 { font-size: 15px; font-weight: 700; }
+
+    .search-wrap { position: relative; }
+    .search-wrap input { padding-left: 30px; width: 220px; }
+    .search-icon {
+      position: absolute;
+      left: 9px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      background: #fafafa;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8faff; }
+
+    td {
+      padding: 11px 16px;
+      vertical-align: middle;
+    }
+
+    .td-id { font-weight: 700; color: var(--text2); font-size: 12px; }
+
+    .td-briefing {
+      max-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge-empresa {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .badge-rhama-sm { background: #e8f0fe; color: var(--blue); }
+    .badge-vexus-sm { background: #fce8ff; color: var(--purple); }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .sp-pendente  { background: #fff3cd; color: #856404; }
+    .sp-andamento { background: #cce5ff; color: #004085; }
+    .sp-concluido { background: #d4edda; color: #155724; }
+    .sp-cancelado { background: #f8d7da; color: #721c24; }
+
+    .td-prazo { white-space: nowrap; }
+    .prazo-atrasado { color: var(--red); font-weight: 700; }
+
+    a.link-anexo {
+      color: var(--blue);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    a.link-anexo:hover { text-decoration: underline; }
+
+    /* Empty / loading */
+    .empty {
+      text-align: center;
+      padding: 48px;
+      color: var(--text2);
+    }
+
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 100;
+      font-size: 14px;
+      color: var(--text2);
+      font-weight: 600;
+    }
+
+    .spinner-lg {
+      width: 40px; height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pagination {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text2);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pagination-btns { display: flex; gap: 6px; }
+    .page-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner-lg"></div>
+  Carregando demandas...
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <div class="logo-badges">
+      <span class="badge badge-rhama">RHAMA</span>
+      <span class="badge badge-vexus">VEXUS</span>
+    </div>
+    <h1>Dashboard de Demandas</h1>
+  </div>
+  <div class="header-right">
+    <select id="filter-empresa">
+      <option value="">Todas as empresas</option>
+      <option value="Rhama Analysis">Rhama Analysis</option>
+      <option value="Vexus Solutions">Vexus Solutions</option>
+    </select>
+    <select id="filter-status">
+      <option value="">Todos os status</option>
+      <option value="Pendente">Pendente</option>
+      <option value="Em andamento">Em andamento</option>
+      <option value="Concluído">Concluído</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+    <button class="btn btn-primary" onclick="carregarDados()">↻ Atualizar</button>
+    <span id="last-update"></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi total">
+      <div class="kpi-label">Total</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-sub">demandas registradas</div>
+    </div>
+    <div class="kpi pendente">
+      <div class="kpi-label">Pendentes</div>
+      <div class="kpi-value" id="kpi-pendente">—</div>
+      <div class="kpi-sub">aguardando início</div>
+    </div>
+    <div class="kpi andamento">
+      <div class="kpi-label">Em andamento</div>
+      <div class="kpi-value" id="kpi-andamento">—</div>
+      <div class="kpi-sub">em execução</div>
+    </div>
+    <div class="kpi concluido">
+      <div class="kpi-label">Concluídas</div>
+      <div class="kpi-value" id="kpi-concluido">—</div>
+      <div class="kpi-sub">finalizadas</div>
+    </div>
+    <div class="kpi atrasado">
+      <div class="kpi-label">Atrasadas</div>
+      <div class="kpi-value" id="kpi-atrasado">—</div>
+      <div class="kpi-sub">prazo vencido</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Status das demandas</div>
+      <div class="chart-wrap">
+        <canvas id="chart-status"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Por empresa</div>
+      <div class="chart-wrap">
+        <canvas id="chart-empresa"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Demandas por mês</div>
+      <div class="chart-wrap">
+        <canvas id="chart-mes"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Todas as demandas</h2>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="Buscar demanda..." oninput="renderTabela()" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Solicitante</th>
+            <th>Empresa</th>
+            <th>Briefing</th>
+            <th>Prazo</th>
+            <th>Status</th>
+            <th>Responsável</th>
+            <th>Anexo</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-body"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span id="pag-info"></span>
+      <div class="pagination-btns" id="pag-btns"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT WEB APP
+  const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+
+  let todasDemandas = [];
+  let paginaAtual = 1;
+  const POR_PAGINA = 15;
+
+  let chartStatus  = null;
+  let chartEmpresa = null;
+  let chartMes     = null;
+
+  // ─── Carregamento de dados ────────────────────────────────
+
+  async function carregarDados() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+      const json = await resp.json();
+
+      if (json.status !== 'ok') throw new Error(json.message);
+
+      todasDemandas = json.dados || [];
+      paginaAtual = 1;
+
+      atualizarKpis();
+      atualizarGraficos();
+      renderTabela();
+
+      const agora = new Date();
+      document.getElementById('last-update').textContent =
+        'Atualizado às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    } catch (err) {
+      alert('Erro ao carregar dados: ' + err.message + '\n\nVerifique se a URL do Apps Script está configurada corretamente.');
+    } finally {
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+  }
+
+  // ─── KPIs ────────────────────────────────────────────────
+
+  function atualizarKpis() {
+    const dados = dadosFiltrados();
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+    const total     = dados.length;
+    const pendente  = dados.filter(d => d.status === 'Pendente').length;
+    const andamento = dados.filter(d => d.status === 'Em andamento').length;
+    const concluido = dados.filter(d => d.status === 'Concluído').length;
+    const atrasado  = dados.filter(d => {
+      if (!d.prazo || d.status === 'Concluído' || d.status === 'Cancelado') return false;
+      const prazo = parsePrazo(d.prazo);
+      return prazo && prazo < hoje;
+    }).length;
+
+    document.getElementById('kpi-total').textContent    = total;
+    document.getElementById('kpi-pendente').textContent = pendente;
+    document.getElementById('kpi-andamento').textContent= andamento;
+    document.getElementById('kpi-concluido').textContent= concluido;
+    document.getElementById('kpi-atrasado').textContent = atrasado;
+  }
+
+  // ─── Gráficos ────────────────────────────────────────────
+
+  function atualizarGraficos() {
+    const dados = dadosFiltrados();
+
+    // Status
+    const statusCounts = { 'Pendente': 0, 'Em andamento': 0, 'Concluído': 0, 'Cancelado': 0 };
+    dados.forEach(d => { if (statusCounts[d.status] !== undefined) statusCounts[d.status]++; });
+
+    if (chartStatus) chartStatus.destroy();
+    chartStatus = new Chart(document.getElementById('chart-status'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(statusCounts),
+        datasets: [{
+          data: Object.values(statusCounts),
+          backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f87171'],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 10 } } }
+      }
+    });
+
+    // Empresa
+    const empCounts = {};
+    dados.forEach(d => {
+      const k = d.empresa || 'Não informado';
+      empCounts[k] = (empCounts[k] || 0) + 1;
+    });
+
+    if (chartEmpresa) chartEmpresa.destroy();
+    chartEmpresa = new Chart(document.getElementById('chart-empresa'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(empCounts),
+        datasets: [{
+          data: Object.values(empCounts),
+          backgroundColor: ['#1a56db', '#9333ea', '#10b981', '#f59e0b'],
+          borderRadius: 6,
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+          x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+        }
+      }
+    });
+
+    // Por mês
+    const mesCounts = {};
+    dados.forEach(d => {
+      const dataStr = String(d.dataEnvio);
+      if (!dataStr) return;
+      // Suporta formato dd/MM/yyyy HH:mm ou yyyy-MM-dd
+      let mes;
+      if (dataStr.includes('/')) {
+        const partes = dataStr.split('/');
+        if (partes.length >= 2) mes = partes[1] + '/' + partes[2]?.substring(0,4);
+      } else {
+        mes = dataStr.substring(0, 7);
+      }
+      if (mes) mesCounts[mes] = (mesCounts[mes] || 0) + 1;
+    });
+
+    const mesesOrdenados = Object.keys(mesCounts).sort();
+
+    if (chartMes) chartMes.destroy();
+    chartMes = new Chart(document.getElementById('chart-mes'), {
+      type: 'line',
+      data: {
+        labels: mesesOrdenados,
+        datasets: [{
+          data: mesesOrdenados.map(m => mesCounts[m]),
+          borderColor: '#1a56db',
+          backgroundColor: 'rgba(26,86,219,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#1a56db',
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#f0f0f0' } },
+          x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // ─── Tabela ──────────────────────────────────────────────
+
+  function renderTabela() {
+    paginaAtual = 1;
+    renderPagina();
+  }
+
+  function renderPagina() {
+    const busca   = document.getElementById('search').value.toLowerCase();
+    let filtrados = dadosFiltrados();
+
+    if (busca) {
+      filtrados = filtrados.filter(d =>
+        (d.id + d.solicitante + d.empresa + d.briefing + d.status + d.responsavel)
+          .toLowerCase().includes(busca)
+      );
+    }
+
+    const total = filtrados.length;
+    const inicio = (paginaAtual - 1) * POR_PAGINA;
+    const pagina = filtrados.slice(inicio, inicio + POR_PAGINA);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+    const tbody = document.getElementById('tabela-body');
+
+    if (pagina.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="9">
+          <div class="empty">
+            <div class="empty-icon">📋</div>
+            <div>Nenhuma demanda encontrada.</div>
+          </div>
+        </td></tr>`;
+    } else {
+      tbody.innerHTML = pagina.map(d => {
+        const prazo = parsePrazo(d.prazo);
+        const atrasado = prazo && prazo < hoje && d.status !== 'Concluído' && d.status !== 'Cancelado';
+        const prazoLabel = prazo ? prazo.toLocaleDateString('pt-BR') : (d.prazo || '—');
+
+        const statusClass = {
+          'Pendente': 'sp-pendente',
+          'Em andamento': 'sp-andamento',
+          'Concluído': 'sp-concluido',
+          'Cancelado': 'sp-cancelado',
+        }[d.status] || 'sp-pendente';
+
+        const empClass = d.empresa === 'Rhama Analysis' ? 'badge-rhama-sm' : 'badge-vexus-sm';
+
+        return `<tr>
+          <td class="td-id">${esc(d.id)}</td>
+          <td>${esc(String(d.dataEnvio).split(' ')[0] || '—')}</td>
+          <td>${esc(d.solicitante)}</td>
+          <td><span class="badge-empresa ${empClass}">${esc(d.empresa)}</span></td>
+          <td class="td-briefing" title="${esc(d.briefing)}">${esc(d.briefing)}</td>
+          <td class="td-prazo ${atrasado ? 'prazo-atrasado' : ''}">${prazoLabel}${atrasado ? ' ⚠️' : ''}</td>
+          <td><span class="status-pill ${statusClass}">${esc(d.status)}</span></td>
+          <td>${esc(d.responsavel) || '<span style="color:#bbb">—</span>'}</td>
+          <td>${d.linkAnexo ? `<a href="${esc(d.linkAnexo)}" target="_blank" class="link-anexo">📎 Ver</a>` : '<span style="color:#bbb">—</span>'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Paginação
+    const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
+    document.getElementById('pag-info').textContent =
+      `Mostrando ${Math.min(inicio + 1, total)}–${Math.min(inicio + POR_PAGINA, total)} de ${total} demanda${total !== 1 ? 's' : ''}`;
+
+    const btns = document.getElementById('pag-btns');
+    btns.innerHTML = `
+      <button class="page-btn" onclick="irPara(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>‹</button>
+      ${Array.from({ length: totalPaginas }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPaginas || Math.abs(p - paginaAtual) <= 1)
+          .reduce((acc, p, idx, arr) => {
+            if (idx > 0 && p - arr[idx - 1] > 1) acc.push('<span style="padding:0 4px;color:#bbb">…</span>');
+            acc.push(`<button class="page-btn ${p === paginaAtual ? 'active' : ''}" onclick="irPara(${p})">${p}</button>`);
+            return acc;
+          }, []).join('')}
+      <button class="page-btn" onclick="irPara(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}>›</button>`;
+  }
+
+  function irPara(p) {
+    const filtrados = dadosFiltrados();
+    const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA) || 1;
+    paginaAtual = Math.max(1, Math.min(p, totalPaginas));
+    renderPagina();
+  }
+
+  // ─── Utilitários ─────────────────────────────────────────
+
+  function dadosFiltrados() {
+    const empresa = document.getElementById('filter-empresa').value;
+    const status  = document.getElementById('filter-status').value;
+
+    return todasDemandas.filter(d => {
+      if (empresa && d.empresa !== empresa) return false;
+      if (status  && d.status  !== status)  return false;
+      return true;
+    });
+  }
+
+  function parsePrazo(prazoStr) {
+    if (!prazoStr) return null;
+    const s = String(prazoStr);
+    // yyyy-MM-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    // dd/MM/yyyy
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+      const [d, m, y] = s.split('/').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    return null;
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ─── Filtros reativos ────────────────────────────────────
+
+  document.getElementById('filter-empresa').addEventListener('change', () => {
+    atualizarKpis();
+    atualizarGraficos();
+    renderTabela();
+  });
+
+  document.getElementById('filter-status').addEventListener('change', () => {
+    atualizarKpis();
+    atualizarGraficos();
+    renderTabela();
+  });
+
+  // ─── Inicialização ───────────────────────────────────────
+
+  carregarDados();
+</script>
+</body>
+</html>

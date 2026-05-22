@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Demanda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 560px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 28px 32px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .logo-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-rhama { background: #e8f0fe; color: #1a56db; }
+    .badge-vexus { background: #fce8ff; color: #9333ea; }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    p.sub {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .card-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    label span.req { color: #e53e3e; margin-left: 2px; }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111;
+      background: #fff;
+      transition: border-color 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #1a56db;
+    }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    .empresa-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .empresa-option input[type="radio"] { display: none; }
+
+    .empresa-option label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      transition: all 0.18s;
+      margin: 0;
+    }
+
+    .empresa-option input[type="radio"]:checked + label {
+      border-color: #1a56db;
+      background: #f0f4ff;
+      color: #1a56db;
+    }
+
+    .empresa-option.vexus input[type="radio"]:checked + label {
+      border-color: #9333ea;
+      background: #faf0ff;
+      color: #9333ea;
+    }
+
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-rhama { background: #1a56db; }
+    .dot-vexus { background: #9333ea; }
+
+    .file-drop {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .file-drop:hover, .file-drop.drag-over {
+      border-color: #1a56db;
+      background: #f0f4ff;
+    }
+
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-drop-icon { font-size: 28px; margin-bottom: 6px; }
+
+    .file-drop p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .file-drop strong { color: #1a56db; }
+
+    #file-name {
+      font-size: 12px;
+      color: #1a56db;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-submit:hover { background: #1747c0; }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { background: #9ab0e8; cursor: not-allowed; }
+
+    /* Estados de feedback */
+    #feedback {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    #feedback.success {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1.5px solid #bbf7d0;
+    }
+
+    #feedback.error {
+      background: #fff1f2;
+      color: #be123c;
+      border: 1.5px solid #fecdd3;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo-row">
+      <span class="badge badge-rhama">RHAMA ANALYSIS</span>
+      <span class="badge badge-vexus">VEXUS SOLUTIONS</span>
+    </div>
+    <h1>Nova Demanda</h1>
+    <p class="sub">Preencha o formulário abaixo para enviar sua solicitação.</p>
+  </div>
+
+  <form class="card-body" id="form-demanda">
+
+    <!-- Quem está pedindo -->
+    <div>
+      <label for="solicitante">Quem está pedindo<span class="req">*</span></label>
+      <input type="text" id="solicitante" name="solicitante" placeholder="Seu nome e equipe" required />
+    </div>
+
+    <!-- Empresa -->
+    <div>
+      <label>Empresa<span class="req">*</span></label>
+      <div class="empresa-group">
+        <div class="empresa-option">
+          <input type="radio" id="rhama" name="empresa" value="Rhama Analysis" required />
+          <label for="rhama">
+            <span class="dot dot-rhama"></span>
+            Rhama Analysis
+          </label>
+        </div>
+        <div class="empresa-option vexus">
+          <input type="radio" id="vexus" name="empresa" value="Vexus Solutions" />
+          <label for="vexus">
+            <span class="dot dot-vexus"></span>
+            Vexus Solutions
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Briefing -->
+    <div>
+      <label for="briefing">Descrição / Briefing<span class="req">*</span></label>
+      <textarea id="briefing" name="briefing" placeholder="Descreva o que precisa: o que é, pra que serve, referências, detalhes importantes..." required></textarea>
+    </div>
+
+    <!-- Prazo -->
+    <div>
+      <label for="prazo">Prazo desejado<span class="req">*</span></label>
+      <input type="date" id="prazo" name="prazo" required />
+    </div>
+
+    <!-- Anexo -->
+    <div>
+      <label>Anexo <span style="font-weight:400;color:#888;">(opcional)</span></label>
+      <div class="file-drop" id="file-drop">
+        <input type="file" id="anexo" name="anexo" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" />
+        <div class="file-drop-icon">📎</div>
+        <p><strong>Clique para selecionar</strong> ou arraste o arquivo aqui</p>
+        <p style="font-size:11px;color:#aaa;margin-top:4px;">PDF, imagem, Word, Excel, PowerPoint — máx. 10 MB</p>
+        <div id="file-name"></div>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div id="feedback"></div>
+
+    <button type="submit" class="btn-submit" id="btn-submit">Enviar demanda</button>
+
+  </form>
+</div>
+
+<script>
+  // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT WEB APP
+  const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+
+  // Preview do nome do arquivo selecionado
+  const fileInput = document.getElementById('anexo');
+  const fileNameEl = document.getElementById('file-name');
+  const fileDrop = document.getElementById('file-drop');
+
+  fileInput.addEventListener('change', () => {
+    fileNameEl.textContent = fileInput.files[0] ? '✓ ' + fileInput.files[0].name : '';
+  });
+
+  fileDrop.addEventListener('dragover', (e) => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+  fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag-over'));
+  fileDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDrop.classList.remove('drag-over');
+    fileInput.files = e.dataTransfer.files;
+    fileNameEl.textContent = fileInput.files[0] ? '✓ ' + fileInput.files[0].name : '';
+  });
+
+  // Envio do formulário
+  document.getElementById('form-demanda').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('btn-submit');
+    const feedback = document.getElementById('feedback');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Enviando...';
+    feedback.style.display = 'none';
+
+    try {
+      const file = fileInput.files[0];
+      let fileBase64 = '';
+      let fileName = '';
+      let fileType = '';
+
+      if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error('O arquivo é maior que 10 MB. Reduza o tamanho e tente novamente.');
+        }
+        const reader = new FileReader();
+        fileBase64 = await new Promise((res, rej) => {
+          reader.onload = () => res(reader.result.split(',')[1]);
+          reader.onerror = rej;
+          reader.readAsDataURL(file);
+        });
+        fileName = file.name;
+        fileType = file.type;
+      }
+
+      const payload = {
+        solicitante: document.getElementById('solicitante').value.trim(),
+        empresa: document.querySelector('input[name="empresa"]:checked')?.value || '',
+        briefing: document.getElementById('briefing').value.trim(),
+        prazo: document.getElementById('prazo').value,
+        fileName,
+        fileType,
+        fileBase64,
+      };
+
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      const result = await resp.json();
+
+      if (result.status === 'ok') {
+        feedback.className = 'success';
+        feedback.textContent = '✓ Demanda enviada com sucesso! Em breve entraremos em contato.';
+        feedback.style.display = 'block';
+        e.target.reset();
+        fileNameEl.textContent = '';
+      } else {
+        throw new Error(result.message || 'Erro desconhecido.');
+      }
+    } catch (err) {
+      feedback.className = 'error';
+      feedback.textContent = '✗ ' + err.message;
+      feedback.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Enviar demanda';
+  });
+</script>
+</body>
+</html>
