@@ -534,11 +534,11 @@
     }).length;
 
     const horasAndamento = dados
-      .filter(d => d.status === 'Em andamento' && d.horas > 0)
-      .reduce((sum, d) => sum + d.horas, 0);
+      .filter(d => d.status === 'Em andamento' && (d.horas || 0) > 0)
+      .reduce((sum, d) => sum + (d.horas || 0), 0);
     const horasConcluido = dados
       .filter(d => d.status === 'Concluído')
-      .reduce((sum, d) => sum + d.horas, 0);
+      .reduce((sum, d) => sum + (d.horas || 0), 0);
 
     document.getElementById('kpi-total').textContent          = total;
     document.getElementById('kpi-pendente').textContent       = pendente;
@@ -712,7 +712,7 @@
           <td class="td-briefing" title="${esc(d.briefing)}">${esc(d.briefing)}</td>
           <td class="td-prazo ${atrasado ? 'prazo-atrasado' : ''}">${prazoLabel}${atrasado ? ' ⚠️' : ''}</td>
           <td><span class="status-pill ${statusClass}">${esc(d.status)}</span></td>
-          <td style="text-align:center;color:${d.horas > 0 ? '#0d9488' : '#bbb'};font-weight:${d.horas > 0 ? '700' : '400'}">${d.horas > 0 ? d.horas + 'h' : '—'}</td>
+          <td style="text-align:center;color:${(d.horas||0) > 0 ? '#0d9488' : '#bbb'};font-weight:${(d.horas||0) > 0 ? '700' : '400'}">${(d.horas||0) > 0 ? (d.horas||0) + 'h' : '—'}</td>
           <td>${esc(d.responsavel) || '<span style="color:#bbb">—</span>'}</td>
           <td>${d.linkAnexo ? `<a href="${esc(d.linkAnexo)}" target="_blank" class="link-anexo">📎 Ver</a>` : '<span style="color:#bbb">—</span>'}</td>
         </tr>`;
