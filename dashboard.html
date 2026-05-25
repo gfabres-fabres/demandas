@@ -29,7 +29,7 @@
       min-height: 100vh;
     }
 
-    /* ââ HEADER ââ */
+    /* ── HEADER ── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -90,10 +90,10 @@
 
     #last-update { font-size: 12px; color: var(--text2); }
 
-    /* ââ MAIN ââ */
+    /* ── MAIN ── */
     main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
 
-    /* ââ KPI CARDS ââ */
+    /* ── KPI CARDS ── */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -136,7 +136,7 @@
     .kpi.concluido .kpi-value{ color: var(--green); }
     .kpi.atrasado .kpi-value { color: var(--red); }
 
-    /* ââ CHARTS ROW ââ */
+    /* ── CHARTS ROW ── */
     .charts-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -166,7 +166,7 @@
 
     .chart-wrap { position: relative; height: 180px; }
 
-    /* ââ TABELA ââ */
+    /* ── TABELA ── */
     .table-card {
       background: var(--surface);
       border-radius: 12px;
@@ -361,10 +361,10 @@
       <option value="">Todos os status</option>
       <option value="Pendente">Pendente</option>
       <option value="Em andamento">Em andamento</option>
-      <option value="ConcluÃ­do">ConcluÃ­do</option>
+      <option value="Concluído">Concluído</option>
       <option value="Cancelado">Cancelado</option>
     </select>
-    <button class="btn btn-primary" onclick="carregarDados()">â» Atualizar</button>
+    <button class="btn btn-primary" onclick="carregarDados()">↻ Atualizar</button>
     <span id="last-update"></span>
   </div>
 </header>
@@ -375,27 +375,27 @@
   <div class="kpi-grid">
     <div class="kpi total">
       <div class="kpi-label">Total</div>
-      <div class="kpi-value" id="kpi-total">â</div>
+      <div class="kpi-value" id="kpi-total">—</div>
       <div class="kpi-sub">demandas registradas</div>
     </div>
     <div class="kpi pendente">
       <div class="kpi-label">Pendentes</div>
-      <div class="kpi-value" id="kpi-pendente">â</div>
-      <div class="kpi-sub">aguardando inÃ­cio</div>
+      <div class="kpi-value" id="kpi-pendente">—</div>
+      <div class="kpi-sub">aguardando início</div>
     </div>
     <div class="kpi andamento">
       <div class="kpi-label">Em andamento</div>
-      <div class="kpi-value" id="kpi-andamento">â</div>
-      <div class="kpi-sub">em execuÃ§Ã£o</div>
+      <div class="kpi-value" id="kpi-andamento">—</div>
+      <div class="kpi-sub">em execução</div>
     </div>
     <div class="kpi concluido">
-      <div class="kpi-label">ConcluÃ­das</div>
-      <div class="kpi-value" id="kpi-concluido">â</div>
+      <div class="kpi-label">Concluídas</div>
+      <div class="kpi-value" id="kpi-concluido">—</div>
       <div class="kpi-sub">finalizadas</div>
     </div>
     <div class="kpi atrasado">
       <div class="kpi-label">Atrasadas</div>
-      <div class="kpi-value" id="kpi-atrasado">â</div>
+      <div class="kpi-value" id="kpi-atrasado">—</div>
       <div class="kpi-sub">prazo vencido</div>
     </div>
   </div>
@@ -415,7 +415,7 @@
       </div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Demandas por mÃªs</div>
+      <div class="chart-title">Demandas por mês</div>
       <div class="chart-wrap">
         <canvas id="chart-mes"></canvas>
       </div>
@@ -427,7 +427,7 @@
     <div class="table-header">
       <h2>Todas as demandas</h2>
       <div class="search-wrap">
-        <span class="search-icon">ð</span>
+        <span class="search-icon">🔍</span>
         <input type="text" id="search" placeholder="Buscar demanda..." oninput="renderTabela()" />
       </div>
     </div>
@@ -443,7 +443,7 @@
             <th>Briefing</th>
             <th>Prazo</th>
             <th>Status</th>
-            <th>ResponsÃ¡vel</th>
+            <th>Responsável</th>
             <th>Anexo</th>
           </tr>
         </thead>
@@ -460,7 +460,7 @@
 </main>
 
 <script>
-  // â ï¸ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT WEB APP
+  // ⚠️ SUBSTITUA PELA URL DO SEU GOOGLE APPS SCRIPT WEB APP
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVDnIlhboxeAslEhUEr8oP6pCsGQOUUH-VfyN4FEEHdBuVkWJXz9DcH_HMNRrjkFW39A/exec';
 
   let todasDemandas = [];
@@ -471,7 +471,7 @@
   let chartEmpresa = null;
   let chartMes     = null;
 
-  // âââ Carregamento de dados ââââââââââââââââââââââââââââââââ
+  // ─── Carregamento de dados ────────────────────────────────
 
   async function carregarDados() {
     document.getElementById('loading-overlay').style.display = 'flex';
@@ -490,15 +490,15 @@
 
       const agora = new Date();
       document.getElementById('last-update').textContent =
-        'Atualizado Ã s ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        'Atualizado às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     } catch (err) {
-      alert('Erro ao carregar dados: ' + err.message + '\n\nVerifique se a URL do Apps Script estÃ¡ configurada corretamente.');
+      alert('Erro ao carregar dados: ' + err.message + '\n\nVerifique se a URL do Apps Script está configurada corretamente.');
     } finally {
       document.getElementById('loading-overlay').style.display = 'none';
     }
   }
 
-  // âââ KPIs ââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ─── KPIs ────────────────────────────────────────────────
 
   function atualizarKpis() {
     const dados = dadosFiltrados();
@@ -507,9 +507,9 @@
     const total     = dados.length;
     const pendente  = dados.filter(d => d.status === 'Pendente').length;
     const andamento = dados.filter(d => d.status === 'Em andamento').length;
-    const concluido = dados.filter(d => d.status === 'ConcluÃ­do').length;
+    const concluido = dados.filter(d => d.status === 'Concluído').length;
     const atrasado  = dados.filter(d => {
-      if (!d.prazo || d.status === 'ConcluÃ­do' || d.status === 'Cancelado') return false;
+      if (!d.prazo || d.status === 'Concluído' || d.status === 'Cancelado') return false;
       const prazo = parsePrazo(d.prazo);
       return prazo && prazo < hoje;
     }).length;
@@ -521,13 +521,13 @@
     document.getElementById('kpi-atrasado').textContent = atrasado;
   }
 
-  // âââ GrÃ¡ficos ââââââââââââââââââââââââââââââââââââââââââââ
+  // ─── Gráficos ────────────────────────────────────────────
 
   function atualizarGraficos() {
     const dados = dadosFiltrados();
 
     // Status
-    const statusCounts = { 'Pendente': 0, 'Em andamento': 0, 'ConcluÃ­do': 0, 'Cancelado': 0 };
+    const statusCounts = { 'Pendente': 0, 'Em andamento': 0, 'Concluído': 0, 'Cancelado': 0 };
     dados.forEach(d => { if (statusCounts[d.status] !== undefined) statusCounts[d.status]++; });
 
     if (chartStatus) chartStatus.destroy();
@@ -550,7 +550,7 @@
     // Empresa
     const empCounts = {};
     dados.forEach(d => {
-      const k = d.empresa || 'NÃ£o informado';
+      const k = d.empresa || 'Não informado';
       empCounts[k] = (empCounts[k] || 0) + 1;
     });
 
@@ -576,7 +576,7 @@
       }
     });
 
-    // Por mÃªs
+    // Por mês
     const mesCounts = {};
     dados.forEach(d => {
       const dataStr = String(d.dataEnvio);
@@ -621,7 +621,7 @@
     });
   }
 
-  // âââ Tabela ââââââââââââââââââââââââââââââââââââââââââââââ
+  // ─── Tabela ──────────────────────────────────────────────
 
   function renderTabela() {
     paginaAtual = 1;
@@ -650,20 +650,20 @@
       tbody.innerHTML = `
         <tr><td colspan="9">
           <div class="empty">
-            <div class="empty-icon">ð</div>
+            <div class="empty-icon">📋</div>
             <div>Nenhuma demanda encontrada.</div>
           </div>
         </td></tr>`;
     } else {
       tbody.innerHTML = pagina.map(d => {
         const prazo = parsePrazo(d.prazo);
-        const atrasado = prazo && prazo < hoje && d.status !== 'ConcluÃ­do' && d.status !== 'Cancelado';
-        const prazoLabel = prazo ? prazo.toLocaleDateString('pt-BR') : (d.prazo || 'â');
+        const atrasado = prazo && prazo < hoje && d.status !== 'Concluído' && d.status !== 'Cancelado';
+        const prazoLabel = prazo ? prazo.toLocaleDateString('pt-BR') : (d.prazo || '—');
 
         const statusClass = {
           'Pendente': 'sp-pendente',
           'Em andamento': 'sp-andamento',
-          'ConcluÃ­do': 'sp-concluido',
+          'Concluído': 'sp-concluido',
           'Cancelado': 'sp-cancelado',
         }[d.status] || 'sp-pendente';
 
@@ -671,34 +671,34 @@
 
         return `<tr>
           <td class="td-id">${esc(d.id)}</td>
-          <td>${esc(String(d.dataEnvio).split(' ')[0] || 'â')}</td>
+          <td>${esc(String(d.dataEnvio).split(' ')[0] || '—')}</td>
           <td>${esc(d.solicitante)}</td>
           <td><span class="badge-empresa ${empClass}">${esc(d.empresa)}</span></td>
           <td class="td-briefing" title="${esc(d.briefing)}">${esc(d.briefing)}</td>
-          <td class="td-prazo ${atrasado ? 'prazo-atrasado' : ''}">${prazoLabel}${atrasado ? ' â ï¸' : ''}</td>
+          <td class="td-prazo ${atrasado ? 'prazo-atrasado' : ''}">${prazoLabel}${atrasado ? ' ⚠️' : ''}</td>
           <td><span class="status-pill ${statusClass}">${esc(d.status)}</span></td>
-          <td>${esc(d.responsavel) || '<span style="color:#bbb">â</span>'}</td>
-          <td>${d.linkAnexo ? `<a href="${esc(d.linkAnexo)}" target="_blank" class="link-anexo">ð Ver</a>` : '<span style="color:#bbb">â</span>'}</td>
+          <td>${esc(d.responsavel) || '<span style="color:#bbb">—</span>'}</td>
+          <td>${d.linkAnexo ? `<a href="${esc(d.linkAnexo)}" target="_blank" class="link-anexo">📎 Ver</a>` : '<span style="color:#bbb">—</span>'}</td>
         </tr>`;
       }).join('');
     }
 
-    // PaginaÃ§Ã£o
+    // Paginação
     const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
     document.getElementById('pag-info').textContent =
-      `Mostrando ${Math.min(inicio + 1, total)}â${Math.min(inicio + POR_PAGINA, total)} de ${total} demanda${total !== 1 ? 's' : ''}`;
+      `Mostrando ${Math.min(inicio + 1, total)}–${Math.min(inicio + POR_PAGINA, total)} de ${total} demanda${total !== 1 ? 's' : ''}`;
 
     const btns = document.getElementById('pag-btns');
     btns.innerHTML = `
-      <button class="page-btn" onclick="irPara(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>â¹</button>
+      <button class="page-btn" onclick="irPara(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>‹</button>
       ${Array.from({ length: totalPaginas }, (_, i) => i + 1)
           .filter(p => p === 1 || p === totalPaginas || Math.abs(p - paginaAtual) <= 1)
           .reduce((acc, p, idx, arr) => {
-            if (idx > 0 && p - arr[idx - 1] > 1) acc.push('<span style="padding:0 4px;color:#bbb">â¦</span>');
+            if (idx > 0 && p - arr[idx - 1] > 1) acc.push('<span style="padding:0 4px;color:#bbb">…</span>');
             acc.push(`<button class="page-btn ${p === paginaAtual ? 'active' : ''}" onclick="irPara(${p})">${p}</button>`);
             return acc;
           }, []).join('')}
-      <button class="page-btn" onclick="irPara(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}>âº</button>`;
+      <button class="page-btn" onclick="irPara(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}>›</button>`;
   }
 
   function irPara(p) {
@@ -708,7 +708,7 @@
     renderPagina();
   }
 
-  // âââ UtilitÃ¡rios âââââââââââââââââââââââââââââââââââââââââ
+  // ─── Utilitários ─────────────────────────────────────────
 
   function dadosFiltrados() {
     const empresa = document.getElementById('filter-empresa').value;
@@ -741,7 +741,7 @@
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // âââ Filtros reativos ââââââââââââââââââââââââââââââââââââ
+  // ─── Filtros reativos ────────────────────────────────────
 
   document.getElementById('filter-empresa').addEventListener('change', () => {
     atualizarKpis();
@@ -755,7 +755,7 @@
     renderTabela();
   });
 
-  // âââ InicializaÃ§Ã£o âââââââââââââââââââââââââââââââââââââââ
+  // ─── Inicialização ───────────────────────────────────────
 
   carregarDados();
 </script>
