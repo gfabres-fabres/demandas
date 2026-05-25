@@ -14,6 +14,7 @@
       --yellow:  #f59e0b;
       --green:   #10b981;
       --red:     #ef4444;
+      --teal:    #0d9488;
       --gray:    #6b7280;
       --bg:      #f0f2f5;
       --surface: #ffffff;
@@ -120,21 +121,25 @@
       height: 3px;
     }
 
-    .kpi.total::before    { background: var(--blue); }
-    .kpi.pendente::before { background: var(--yellow); }
-    .kpi.andamento::before{ background: var(--blue); }
-    .kpi.concluido::before{ background: var(--green); }
-    .kpi.atrasado::before { background: var(--red); }
+    .kpi.total::before          { background: var(--blue); }
+    .kpi.pendente::before       { background: var(--yellow); }
+    .kpi.andamento::before      { background: var(--blue); }
+    .kpi.concluido::before      { background: var(--green); }
+    .kpi.atrasado::before       { background: var(--red); }
+    .kpi.horas-andamento::before{ background: var(--teal); }
+    .kpi.horas-concluido::before{ background: var(--teal); }
 
     .kpi-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
     .kpi-value { font-size: 36px; font-weight: 800; line-height: 1; }
     .kpi-sub   { font-size: 12px; color: var(--text2); }
 
-    .kpi.total .kpi-value    { color: var(--blue); }
-    .kpi.pendente .kpi-value { color: var(--yellow); }
-    .kpi.andamento .kpi-value{ color: var(--blue); }
-    .kpi.concluido .kpi-value{ color: var(--green); }
-    .kpi.atrasado .kpi-value { color: var(--red); }
+    .kpi.total .kpi-value          { color: var(--blue); }
+    .kpi.pendente .kpi-value       { color: var(--yellow); }
+    .kpi.andamento .kpi-value      { color: var(--blue); }
+    .kpi.concluido .kpi-value      { color: var(--green); }
+    .kpi.atrasado .kpi-value       { color: var(--red); }
+    .kpi.horas-andamento .kpi-value{ color: var(--teal); }
+    .kpi.horas-concluido .kpi-value{ color: var(--teal); }
 
     /* ── CHARTS ROW ── */
     .charts-row {
@@ -246,8 +251,9 @@
       border-radius: 20px;
     }
 
-    .badge-rhama-sm { background: #e8f0fe; color: var(--blue); }
-    .badge-vexus-sm { background: #fce8ff; color: var(--purple); }
+    .badge-rhama-sm         { background: #e8f0fe; color: var(--blue); }
+    .badge-vexus-sm         { background: #fce8ff; color: var(--purple); }
+    .badge-institucional-sm { background: #d1fae5; color: var(--teal); }
 
     .status-pill {
       display: inline-block;
@@ -348,6 +354,7 @@
     <div class="logo-badges">
       <span class="badge badge-rhama">RHAMA</span>
       <span class="badge badge-vexus">VEXUS</span>
+      <span class="badge" style="background:#d1fae5;color:#0d9488;">INSTITUCIONAL</span>
     </div>
     <h1>Dashboard de Demandas</h1>
   </div>
@@ -356,6 +363,7 @@
       <option value="">Todas as empresas</option>
       <option value="Rhama Analysis">Rhama Analysis</option>
       <option value="Vexus Solutions">Vexus Solutions</option>
+      <option value="Institucional">Institucional</option>
     </select>
     <select id="filter-status">
       <option value="">Todos os status</option>
@@ -397,6 +405,16 @@
       <div class="kpi-label">Atrasadas</div>
       <div class="kpi-value" id="kpi-atrasado">—</div>
       <div class="kpi-sub">prazo vencido</div>
+    </div>
+    <div class="kpi horas-andamento">
+      <div class="kpi-label">⏱ Horas em andamento</div>
+      <div class="kpi-value" id="kpi-horas-andamento">—</div>
+      <div class="kpi-sub">horas registradas</div>
+    </div>
+    <div class="kpi horas-concluido">
+      <div class="kpi-label">⏱ Horas concluídas</div>
+      <div class="kpi-value" id="kpi-horas-concluido">—</div>
+      <div class="kpi-sub">horas finalizadas</div>
     </div>
   </div>
 
@@ -443,6 +461,7 @@
             <th>Briefing</th>
             <th>Prazo</th>
             <th>Status</th>
+            <th>Horas</th>
             <th>Responsável</th>
             <th>Anexo</th>
           </tr>
@@ -514,11 +533,25 @@
       return prazo && prazo < hoje;
     }).length;
 
-    document.getElementById('kpi-total').textContent    = total;
-    document.getElementById('kpi-pendente').textContent = pendente;
-    document.getElementById('kpi-andamento').textContent= andamento;
-    document.getElementById('kpi-concluido').textContent= concluido;
-    document.getElementById('kpi-atrasado').textContent = atrasado;
+    const horasAndamento = dados
+      .filter(d => d.status === 'Em andamento' && d.horas > 0)
+      .reduce((sum, d) => sum + d.horas, 0);
+    const horasConcluido = dados
+      .filter(d => d.status === 'Concluído')
+      .reduce((sum, d) => sum + d.horas, 0);
+
+    document.getElementById('kpi-total').textContent          = total;
+    document.getElementById('kpi-pendente').textContent       = pendente;
+    document.getElementById('kpi-andamento').textContent      = andamento;
+    document.getElementById('kpi-concluido').textContent      = concluido;
+    document.getElementById('kpi-atrasado').textContent       = atrasado;
+    document.getElementById('kpi-horas-andamento').textContent= formatHoras(horasAndamento);
+    document.getElementById('kpi-horas-concluido').textContent= formatHoras(horasConcluido);
+  }
+
+  function formatHoras(h) {
+    if (h === 0) return '0h';
+    return (h % 1 === 0 ? h : h.toFixed(1)) + 'h';
   }
 
   // ─── Gráficos ────────────────────────────────────────────
@@ -648,7 +681,7 @@
 
     if (pagina.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="9">
+        <tr><td colspan="10">
           <div class="empty">
             <div class="empty-icon">📋</div>
             <div>Nenhuma demanda encontrada.</div>
@@ -667,7 +700,9 @@
           'Cancelado': 'sp-cancelado',
         }[d.status] || 'sp-pendente';
 
-        const empClass = d.empresa === 'Rhama Analysis' ? 'badge-rhama-sm' : 'badge-vexus-sm';
+        const empClass = d.empresa === 'Rhama Analysis' ? 'badge-rhama-sm'
+                       : d.empresa === 'Vexus Solutions' ? 'badge-vexus-sm'
+                       : 'badge-institucional-sm';
 
         return `<tr>
           <td class="td-id">${esc(d.id)}</td>
@@ -677,6 +712,7 @@
           <td class="td-briefing" title="${esc(d.briefing)}">${esc(d.briefing)}</td>
           <td class="td-prazo ${atrasado ? 'prazo-atrasado' : ''}">${prazoLabel}${atrasado ? ' ⚠️' : ''}</td>
           <td><span class="status-pill ${statusClass}">${esc(d.status)}</span></td>
+          <td style="text-align:center;color:${d.horas > 0 ? '#0d9488' : '#bbb'};font-weight:${d.horas > 0 ? '700' : '400'}">${d.horas > 0 ? d.horas + 'h' : '—'}</td>
           <td>${esc(d.responsavel) || '<span style="color:#bbb">—</span>'}</td>
           <td>${d.linkAnexo ? `<a href="${esc(d.linkAnexo)}" target="_blank" class="link-anexo">📎 Ver</a>` : '<span style="color:#bbb">—</span>'}</td>
         </tr>`;

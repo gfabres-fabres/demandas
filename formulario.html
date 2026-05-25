@@ -101,7 +101,7 @@
 
     .empresa-group {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
     }
 
@@ -134,14 +134,21 @@
       color: #9333ea;
     }
 
+    .empresa-option.institucional input[type="radio"]:checked + label {
+      border-color: #0d9488;
+      background: #f0fdf9;
+      color: #0d9488;
+    }
+
     .dot {
       width: 10px; height: 10px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
-    .dot-rhama { background: #1a56db; }
-    .dot-vexus { background: #9333ea; }
+    .dot-rhama        { background: #1a56db; }
+    .dot-vexus        { background: #9333ea; }
+    .dot-institucional{ background: #0d9488; }
 
     .file-drop {
       border: 2px dashed #d1d5db;
@@ -273,6 +280,13 @@
           <label for="vexus">
             <span class="dot dot-vexus"></span>
             Vexus Solutions
+          </label>
+        </div>
+        <div class="empresa-option institucional">
+          <input type="radio" id="institucional" name="empresa" value="Institucional" />
+          <label for="institucional">
+            <span class="dot dot-institucional"></span>
+            Institucional
           </label>
         </div>
       </div>
